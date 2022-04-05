@@ -198,9 +198,9 @@ jobs:
             --set authorizerClassName="kafka.security.authorizer.AclAuthorizer" \
             --wait
 
-      - name: Get Kafka password
+      - name: Get Kafka Client Password
         id: kafka
-        run: echo "::set-output name=password::$(kubectl -n kafka-cluster exec kafka-dev-0 -- cat /opt/bitnami/kafka/config/kafka_jaas.conf)"
+        run: echo "::set-output name=password::$(kubectl get secret kafka-dev-jaas --namespace kafka-cluster -o jsonpath='{.data.client-passwords}' | base64 --decode | cut -d , -f 1)"
 
       - name: Create Kafka Credentials File
         env:
@@ -219,10 +219,17 @@ jobs:
 
       - name: check file
         run: cat kc.json
-        
+
       - name: create Kafka K8s secret
         run: kubectl -n kafka-cluster create secret generic kafka-creds --from-file=credentials=kc.json
       
+      - name: Run KubeFwd
+        uses: docker://txn2/kubefwd
+        with:
+          args: svc -n kafka-cluster
+          privileged: true
+          remove: true
+
       - name: Run Unit Tests
         run: make -j2 test
 
