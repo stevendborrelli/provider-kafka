@@ -238,7 +238,7 @@ jobs:
           smoke_test: "${binary} version"
 
       - name: run Kubefwd
-        run: kubefwd svc -n kafka-cluster
+        run: sudo -E kubefwd svc -n kafka-cluster
 
       - name: Run Unit Tests
         run: make -j2 test
