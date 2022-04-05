@@ -17,6 +17,7 @@ env:
   HELM_VERSION: 'v3.8.1'
   CROSSPLANE_VERSION: 'stable'
   KUBECTL_VERSION: 'v1.23.4'
+  KUBEFWD_VERSION: '1.2.2'
 
   # Common users. We can't run a step 'if secrets.AWS_USR != ""' but we can run
   # a step 'if env.AWS_USR' != ""', so we copy these to succinctly test whether
@@ -232,13 +233,13 @@ jobs:
         uses: giantswarm/install-binary-action@v1.0.0
         with:
           binary: "kubefwd"
-          version: "3.0.0"
-          download_url: "https://github.com/txn2/kubefwd/releases/download/1.22.0/kubefwd_Linux_x86_64.tar.gz"
-          tarball_binary_path: "kubefwd"
+          version: "${{ env.KUBEFWD_VERSION }}"
+          download_url: "https://github.com/txn2/kubefwd/releases/download/${version}/${binary}_Linux_x86_64.tar.gz"
+          tarball_binary_path: "${binary}"
           smoke_test: "${binary} version"
 
       - name: run Kubefwd
-        run: sudo -E kubefwd svc -n kafka-cluster
+        run: sudo -E /opt/hostedtoolcache/kubefwd/${{ env.KUBEFWD_VERSION }}/x64/kubefwd svc -n kafka-cluster
 
       - name: Run Unit Tests
         run: make -j2 test
