@@ -229,11 +229,13 @@ jobs:
       
       - name: Run KubeFwd
         uses: docker://txn2/kubefwd
+        env:
+          KUBECONFIG: /github/workflow/.kube/config
         with:
           args: svc -n kafka-cluster
           privileged: true
           remove: true
-          
+
       - name: Run Unit Tests
         run: make -j2 test
 
