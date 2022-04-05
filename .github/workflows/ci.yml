@@ -177,9 +177,14 @@ jobs:
           version: ${{ env.KIND_VERSION }}
           cluster_name: 'kafka'
 
-      - name: Get Kubeconfig Location
-        id: kubeconfig
-        run: echo "::set-output name=location::$(kind get kubeconfig-path)"
+      - name: Homedir 
+        run: | 
+          ls -al $HOME 
+          ls -al $HOME/.kube
+          
+      # - name: Get Kubeconfig Location
+      #   id: kubeconfig
+      #   run: echo "::set-output name=location::$(kind get kubeconfig-path)"
       
       - name: Install Crossplane
         run: |
