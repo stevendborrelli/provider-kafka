@@ -225,6 +225,8 @@ jobs:
       
       - name: Run KubeFwd
         uses: docker://txn2/kubefwd
+        env:
+          KUBECONFIG: /github/home/.kube/config
         with:
           args: svc -n kafka-cluster
           privileged: true
