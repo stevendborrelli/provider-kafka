@@ -193,7 +193,25 @@ jobs:
 
       - name: Install Provider-Kafka CRDs
         run: kubectl apply -f package/crds
-        
+      
+      - name: create Kafka K8s namespace
+        run: kubectl create ns kafka-cluster
+
+      # Note there is an issue with upstream https://github.com/deliverybot/helm/issues/66
+      # helm action. Use the glopezep/helm@v1.7.1 action until PR is merged.
+      - name: Install Kafka via Helm
+        #uses: 'deliverybot/helm@v1'
+        uses: 'glopezep/helm@v1.7.1'
+        with:
+          repository:  https://charts.bitnami.com/bitnami
+          chart: bitnami/kafka
+          namespace:  kafka-cluster
+          values: |
+            version: "15.0.1" 
+            auth.clientProtocol: sasl 
+            deleteTopicEnable: true 
+            authorizerClassName: "kafka.security.authorizer.AclAuthorizer"
+
       - name: Run Unit Tests
         run: make -j2 test
 
