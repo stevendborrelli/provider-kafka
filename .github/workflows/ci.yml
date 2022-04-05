@@ -176,6 +176,10 @@ jobs:
         with:
           version: ${{ env.KIND_VERSION }}
           cluster_name: 'kafka'
+
+      - name: Get Kubeconfig Location
+        id: kubeconfig
+        run: echo "::set-output name=location::$(kind get kubeconfig-path)"
       
       - name: Install Crossplane
         run: |
@@ -226,7 +230,7 @@ jobs:
       - name: Run KubeFwd
         uses: docker://txn2/kubefwd
         env:
-          KUBECONFIG: /github/home/.kube/config
+          KUBECONFIG: ${{ steps.kubeconfig.outputs.location }}
         with:
           args: svc -n kafka-cluster
           privileged: true
