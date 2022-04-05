@@ -234,8 +234,7 @@ jobs:
           binary: "kubefwd"
           version: "3.0.0"
           download_url: "https://github.com/txn2/kubefwd/releases/download/1.22.0/kubefwd_Linux_x86_64.tar.gz"
-          #download_url: "https://github.com/fsaintjacques/${binary}-tool/archive/${version}.tar.gz"
-          #tarball_binary_path: "*/src/${binary}"
+          tarball_binary_path: "kubefwd"
           smoke_test: "${binary} --version"
       # - name: Run KubeFwd
       #   uses: docker://txn2/kubefwd
@@ -248,7 +247,7 @@ jobs:
 
       - name: run Kubefwd
         run: kubefwd svc -n kafka-cluster
-        
+
       - name: Run Unit Tests
         run: make -j2 test
 
