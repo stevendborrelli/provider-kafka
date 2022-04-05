@@ -229,6 +229,8 @@ jobs:
           args: svc -n kafka-cluster
           privileged: true
           remove: true
+          volumes: 
+            - $HOME/.kube/:/root/.kube/
 
       - name: Run Unit Tests
         run: make -j2 test
