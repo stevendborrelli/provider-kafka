@@ -177,13 +177,17 @@ jobs:
           version: ${{ env.KIND_VERSION }}
           kubectl_version: ${{ env.KUBECTL_VERSION }}
           cluster_name: 'kafka'
+      
+      - name: Install Crossplane
+        run: |
+          kubectl create ns crossplane system
           
-      - name: Install Crossplane via Helm
-        uses: 'deliverybot/helm@v1'
-        with:
-          chart: https://charts.crossplane.io/stable
-          namespace: crossplane-system
-          release: 'crossplane'
+      # - name: Install Crossplane via Helm
+      #   uses: 'deliverybot/helm@v1'
+      #   with:
+      #     chart: https://charts.crossplane.io/stable
+      #     namespace: crossplane-system
+      #     release: 'crossplane'
 
       - name: Install Provider-Kafka CRDs
         run: kubectl apply -f package/crds
