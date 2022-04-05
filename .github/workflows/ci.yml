@@ -184,34 +184,45 @@ jobs:
           helm repo update
           helm install crossplane --namespace crossplane-system crossplane-stable/crossplane
           
-      # - name: Install Crossplane via Helm
-      #   uses: 'deliverybot/helm@v1'
-      #   with:
-      #     chart: https://charts.crossplane.io/stable
-      #     namespace: crossplane-system
-      #     release: 'crossplane'
-
       - name: Install Provider-Kafka CRDs
         run: kubectl apply -f package/crds
+         
+      - name: Intsall Kafka via helm
+        run: |
+          helm repo add bitnami https://charts.bitnami.com/bitnami
+          kubectl create ns kafka-cluster
+          helm upgrade --install kafka-dev -n kafka-cluster bitnami/kafka \
+            --version 15.0.1 \
+            --set auth.clientProtocol=sasl \
+            --set deleteTopicEnable=true \
+            --set authorizerClassName="kafka.security.authorizer.AclAuthorizer" \
+            --wait
+
+      - name: Get Kafka password
+        id: kafka
+        run: echo "::set-output name=password::$(kubectl -n kafka-cluster exec kafka-dev-0 -- cat /opt/bitnami/kafka/config/kafka_jaas.conf)"
+
+      - name: Create Kafka Credentials File
+        env:
+          KAFKA_PASSWORD: ${{ steps.kafka.outputs.password }}
+        run: |
+          echo "{
+            "brokers": [
+              "kafka-dev-0.kafka-dev-headless:9092"
+            ],
+            "sasl": {
+              "mechanism": "PLAIN",
+              "username": "user",
+              "password": "${KAFKA_PASSWORD}"
+            }
+          }" > kc.json
+
+      - name: check file
+        run: cat kc.json
+        
+      - name: create Kafka K8s secret
+        run: kubectl -n kafka-cluster create secret generic kafka-creds --from-file=credentials=kc.json
       
-      - name: create Kafka K8s namespace
-        run: kubectl create ns kafka-cluster
-
-      # Note there is an issue with upstream https://github.com/deliverybot/helm/issues/66
-      # helm action. Use the glopezep/helm@v1.7.1 action until PR is merged.
-      - name: Install Kafka via Helm
-        #uses: 'deliverybot/helm@v1'
-        uses: 'glopezep/helm@v1.7.1'
-        with:
-          repository:  https://charts.bitnami.com/bitnami
-          chart: bitnami/kafka
-          namespace:  kafka-cluster
-          values: |
-            version: "15.0.1" 
-            auth.clientProtocol: sasl 
-            deleteTopicEnable: true 
-            authorizerClassName: "kafka.security.authorizer.AclAuthorizer"
-
       - name: Run Unit Tests
         run: make -j2 test
 
