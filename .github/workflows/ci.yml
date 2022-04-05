@@ -187,7 +187,7 @@ jobs:
       - name: Install Provider-Kafka CRDs
         run: kubectl apply -f package/crds
          
-      - name: Intsall Kafka via helm
+      - name: Install Kafka
         run: |
           helm repo add bitnami https://charts.bitnami.com/bitnami
           kubectl create ns kafka-cluster
@@ -217,7 +217,7 @@ jobs:
             }
           }" > kc.json
 
-      - name: check file
+      - name: Show kc.json file
         run: cat kc.json
 
       - name: create Kafka K8s secret
@@ -229,8 +229,7 @@ jobs:
           args: svc -n kafka-cluster
           privileged: true
           remove: true
-          volumes: 
-            - $HOME/.kube/:/root/.kube/
+          volumes: "$HOME/.kube/:/root/.kube/"
 
       - name: Run Unit Tests
         run: make -j2 test
