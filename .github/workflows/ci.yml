@@ -227,15 +227,28 @@ jobs:
       - name: create Kafka K8s secret
         run: kubectl -n kafka-cluster create secret generic kafka-creds --from-file=credentials=kc.json
       
-      - name: Run KubeFwd
-        uses: docker://txn2/kubefwd
-        env:
-          KUBECONFIG: /github/workspace/.kube/config
-        with:
-          args: svc -n kafka-cluster
-          privileged: true
-          remove: true
 
+      - name: Test downloading external binary
+        uses: giantswarm/install-binary-action@v1.0.0
+        with:
+          binary: "kubefwd"
+          version: "3.0.0"
+          download_url: "https://github.com/txn2/kubefwd/releases/download/1.22.0/kubefwd_Linux_x86_64.tar.gz"
+          #download_url: "https://github.com/fsaintjacques/${binary}-tool/archive/${version}.tar.gz"
+          #tarball_binary_path: "*/src/${binary}"
+          smoke_test: "${binary} --version"
+      # - name: Run KubeFwd
+      #   uses: docker://txn2/kubefwd
+      #   env:
+      #     KUBECONFIG: /github/workspace/.kube/config
+      #   with:
+      #     args: svc -n kafka-cluster
+      #     privileged: true
+      #     remove: true
+
+      - name: run Kubefwd
+        run: kubefwd svc -n kafka-cluster
+        
       - name: Run Unit Tests
         run: make -j2 test
 
