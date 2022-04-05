@@ -179,9 +179,10 @@ jobs:
 
       - name: Homedir 
         run: | 
+          pwd
           ls -al $HOME 
           ls -al $HOME/.kube
-          
+
       # - name: Get Kubeconfig Location
       #   id: kubeconfig
       #   run: echo "::set-output name=location::$(kind get kubeconfig-path)"
