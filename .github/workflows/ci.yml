@@ -13,6 +13,10 @@ env:
   GO_VERSION: '1.17'
   GOLANGCI_VERSION: 'v1.31'
   DOCKER_BUILDX_VERSION: 'v0.4.2'
+  KIND_VERSION: 'v0.12.0`
+  HELM_VERSION: 'v3.8.1'
+  CROSSPLANE_VERSION: `stable`
+  KUBECTL_VERSION: `v1.23.4`
 
   # Common users. We can't run a step 'if secrets.AWS_USR != ""' but we can run
   # a step 'if env.AWS_USR' != ""', so we copy these to succinctly test whether
@@ -167,6 +171,23 @@ jobs:
       - name: Vendor Dependencies
         run: make vendor vendor.check
 
+      - name: Set up Kind Cluster 
+        run: helm/kind-action@v1.2.0
+        with:
+          version: ${{ env.KIND_VERSION }}
+          kubectl_version: ${{ env.KUBECTL_VERSION }}
+          cluster_name: 'kafka'
+          
+      - name: Install Crossplane via Helm
+        uses: 'deliverybot/helm@v1'
+        with:
+          chart: https://charts.crossplane.io/stable
+          namespace: crossplane-system
+          release: 'crossplane'
+
+      - name: Install Provider-Kafka CRDs
+        run: kubectl apply -f package/crds
+        
       - name: Run Unit Tests
         run: make -j2 test
 
