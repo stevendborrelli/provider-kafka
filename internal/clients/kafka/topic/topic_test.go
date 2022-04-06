@@ -13,7 +13,7 @@ import (
 	"github.com/twmb/franz-go/pkg/kadm"
 )
 
-var kafka_password = os.Getenv("KAFKA_PASSWORD")
+var kafkaPassword = os.Getenv("KAFKA_PASSWORD")
 
 var dataTesting = []byte(
 	fmt.Sprintf(`{
@@ -23,7 +23,7 @@ var dataTesting = []byte(
 				"username": "user",
 				"password": "%s"
 			}
-		}`, kafka_password),
+		}`, kafkaPassword),
 )
 
 // var dataTesting = []byte(`{
